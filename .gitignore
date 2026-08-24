@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+/shots/
+# The COMPOSED featured images are committed: they are what the site serves,
+# they are small (~40 KB avif each), and Render has no way to regenerate them
+# because the capture step needs real internet. The RAW captures are inputs —
+# multi-megabyte PNGs that only exist to be composited — so they stay out.
+public/shots/raw/
+.env
+.env.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

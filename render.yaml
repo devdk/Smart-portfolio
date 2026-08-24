@@ -1,0 +1,72 @@
+# ==========================================================================
+# RENDER BLUEPRINT
+#
+# Deploys the portfolio as a Node web service. Point Render at this file
+# (New → Blueprint) rather than configuring the service by hand in the
+# dashboard, so the deploy config is reviewable in the repo alongside the code
+# that depends on it.
+#
+# ── WHY A WEB SERVICE AND NOT A STATIC SITE ────────────────────────────────
+#
+# A static site would be cheaper, and it is not an option here. The contact
+# form posts to /api/contact, and the app runs with cacheComponents and
+# partial prerendering — /work streams its filtered half at request time.
+# Both need a Node process. `output: 'export'` would refuse to build.
+#
+# ── WHY check:content IS IN THE BUILD COMMAND ──────────────────────────────
+#
+# It is the honesty gate. Any [BRACKETED] placeholder left in the content
+# fails the build, so a half-finished case study cannot reach a public URL by
+# accident. This is the single most valuable line in this file.
+#
+# To deploy anyway — to show someone work in progress — set
+# ALLOW_PLACEHOLDERS=1 in the dashboard. That turns the gate into a warning
+# AND makes the build unindexable: robots.txt disallows everything, the
+# sitemap returns empty, and the root metadata says noindex. You can preview a
+# site with holes; you cannot publish one to a search engine.
+# ==========================================================================
+
+services:
+  - type: web
+    name: dheeraj-portfolio
+    runtime: node
+    plan: free
+    # Closest region to Gurgaon of the ones Render offers. Change freely —
+    # nothing in the app depends on it.
+    region: singapore
+
+    # npm ci, not npm install: the lockfile is the point of committing it.
+    buildCommand: npm ci && npm run check:content && npm run build
+    # `next start` binds Render's $PORT from the environment on its own.
+    startCommand: npm start
+
+    healthCheckPath: /
+
+    envVars:
+      # engines in package.json requires >= 20.9.
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+
+      # ---- Set these in the Render dashboard, not here --------------------
+      #
+      # SITE_ORIGIN — the origin THIS service is served from, with no trailing
+      #   slash. On a first deploy that is https://<service>.onrender.com; on
+      #   the real domain it is https://dheerajdrive.com. It drives canonical
+      #   URLs, the sitemap and robots.txt. Leave it unset and the build
+      #   assumes the production domain — which on a preview means publishing a
+      #   sitemap full of URLs that belong to a different site.
+      #
+      # ALLOW_PLACEHOLDERS — "1" to ship with unfilled [BRACKETS] and no
+      #   indexing. Unset it the moment the content is real.
+      #
+      # CONTACT_WEBHOOK_URL — where contact submissions are delivered. Without
+      #   it the form still succeeds and logs server-side, so a preview never
+      #   looks broken to whoever is testing it.
+      - key: SITE_ORIGIN
+        sync: false
+      - key: ALLOW_PLACEHOLDERS
+        sync: false
+      - key: CONTACT_WEBHOOK_URL
+        sync: false
