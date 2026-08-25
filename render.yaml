@@ -36,8 +36,19 @@ services:
     region: singapore
 
     # npm ci, not npm install: the lockfile is the point of committing it.
-    buildCommand: npm ci && npm run check:content && npm run build
-    # `next start` binds Render's $PORT from the environment on its own.
+    #
+    # --include=dev is load-bearing. The build needs devDependencies —
+    # tailwindcss compiles the stylesheet, typescript type-checks, tsx runs the
+    # content gate — and a Node service whose NODE_ENV is production will have
+    # npm skip devDependencies entirely. The failure is confusing when it
+    # happens: the install succeeds and the build dies on a missing module that
+    # is right there in package.json.
+    buildCommand: npm ci --include=dev && npm run check:content && npm run build
+
+    # `next start` reads PORT from the environment, which is how Render tells a
+    # service where to listen. VERIFIED rather than assumed: PORT=3456 npm start
+    # binds 3456. If this ever changes, the symptom is Render reporting "no
+    # open ports detected" and the fix is `npx next start -p $PORT`.
     startCommand: npm start
 
     healthCheckPath: /
