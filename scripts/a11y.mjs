@@ -29,6 +29,7 @@ async function projectRoutes() {
 const ROUTES = [
   '/',
   '/work',
+  '/work?view=map',
   '/thinking',
   '/cv',
   '/about',
@@ -141,15 +142,26 @@ for (const route of ROUTES) {
 // Scoped per tablist by accessible name. The homepage has TWO of them now
 // (Process and the Lab's act rail), so an unscoped [role="tab"] selector
 // matches both and fails Playwright's strict mode.
-for (const name of ['Project stages', 'Instruments']) {
+/* Each tablist is tested WHERE IT LIVES. This list used to assume both were
+   on the homepage, so removing the Lab block from `/` made the check time out
+   against an element that had simply moved. A test that names a route is a
+   test that survives the page being reorganised. */
+/* The 'Instruments' tablist was removed with components/sections/Lab.tsx.
+   That component was the PINNED, tab-switched version of the three lab
+   instruments and existed only for the homepage block; /lab lays the same
+   three out in full, with no tabs. Deleting the homepage block orphaned it,
+   so the component went and this check went with it — a keyboard test for an
+   interaction pattern the site no longer has is a test that can only fail or
+   mislead. */
+for (const { name, route } of [{ name: 'Project stages', route: '/' }]) {
   const page = await ctx.newPage()
-  await page.goto(`${BASE}/`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
   const list = page.getByRole('tablist', { name })
   await list.getByRole('tab').first().focus()
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(200)
   const selected = await list.locator('[role="tab"][aria-selected="true"]').textContent()
-  console.log(`${name} tablist ArrowRight -> ${selected?.trim()}`)
+  console.log(`${name} tablist (${route}) ArrowRight -> ${selected?.trim()}`)
   await page.close()
 }
 

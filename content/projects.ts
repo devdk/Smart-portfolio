@@ -37,6 +37,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Sole developer, end to end — at Mirasphere Digital, for an agency client',
     year: 2026,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'accountancy',
     duration: '~8 weeks from first line to production',
     client: 'Fordham Finance Group',
     url: 'https://crm.fordhamfinance.co.uk',
@@ -237,6 +239,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Sole developer, end to end — at Mirasphere Digital, for an agency client',
     year: 2026,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'accountancy',
     client: 'Swann Bookkeeping & Accountancy',
 
     stack: [
@@ -539,6 +543,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Sole developer, end to end — an in-house product at Mirasphere Digital',
     year: 2026,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'digital agency',
     clientDescriptor: 'Mirasphere Digital, as its own product rather than for a client',
     repo: 'https://github.com/devdk/Voiceover-Video-Generator',
 
@@ -716,6 +722,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Consultant on approach and design, then developer alongside the client’s in-house team',
     year: 2026,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'kitchenware and homeware retail',
     client: 'RECC, Malta',
     url: 'https://chefsandhomes.com/',
 
@@ -760,6 +768,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Developer, then performance and technical SEO',
     year: 2026,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'clothing and accessories',
     client: 'Zyvren',
     url: 'https://zyvren.com/',
 
@@ -804,6 +814,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Shopify developer — theme architecture and Liquid build, working to the client’s in-house design team',
     year: 2025,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'women\'s health',
     client: 'Women Wellness First',
     url: 'https://womenwellnessfirst.com/',
 
@@ -852,6 +864,7 @@ export const projects: ProjectInput[] = [
 
     role: 'Developer, then the performance, schema and local-search work after launch',
     year: 2025,
+    clientIndustry: 'dentistry',
     client: 'Allure Dental Care',
     url: 'https://alluredentalcare.co.uk/',
 
@@ -896,6 +909,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Sole developer, end to end — at Mirasphere Digital, for an agency client',
     year: 2025,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'offshore and maritime recruitment',
     client: 'Mariforce Crewing',
     url: 'https://mariforce.com/',
 
@@ -931,7 +946,11 @@ export const projects: ProjectInput[] = [
 
   {
     slug: 'swann-bookkeeping',
-    title: 'Swann Bookkeeping & Accountancy',
+    /* Titled to distinguish the PROJECT from the CLIENT. Both were called
+       "Swann Bookkeeping & Accountancy", which the graph exposed the moment it
+       reported the repeat client: "2 projects: CH Scrapper, Swann Bookkeeping
+       & Accountancy" reads as if the firm itself were a deliverable. */
+    title: 'Swann Bookkeeping — Website',
     tagline: 'A London accountancy firm’s services, made legible to the businesses that need them.',
 
     category: 'wordpress',
@@ -940,6 +959,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Sole developer, end to end — at Mirasphere Digital, for an agency client',
     year: 2025,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'accountancy',
     client: 'Swann Bookkeeping & Accountancy',
     url: 'https://swann-bookkeeping.com/',
 
@@ -980,7 +1001,11 @@ export const projects: ProjectInput[] = [
 
   {
     slug: 'mirasphere-site',
-    title: 'Mirasphere Digital',
+    /* Same collision the graph exposed for Swann: the PROJECT and the
+       EMPLOYER were both called "Mirasphere Digital", so the map drew two
+       differently-coloured nodes with identical names sitting next to each
+       other. The employer is Mirasphere Digital; this is their site. */
+    title: 'Mirasphere Digital — Agency Site',
     tagline: 'The agency’s own site — the one where the work has to argue for itself.',
 
     category: 'wordpress',
@@ -989,6 +1014,8 @@ export const projects: ProjectInput[] = [
 
     role: 'Developer and technical SEO — the agency’s own site, built in-house',
     year: 2025,
+    employer: 'Mirasphere Digital',
+    clientIndustry: 'digital agency',
     clientDescriptor: 'Mirasphere Digital, as the agency’s own site rather than a client project',
     url: 'https://mirasphere.digital/',
 

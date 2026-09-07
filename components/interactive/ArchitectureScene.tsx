@@ -17,7 +17,7 @@ import type { Project } from '@/lib/schema'
    that was assembled in an order, for reasons, and the order is the argument.
 
    ── WHY STICKY, AND WHY THE DEFINITION OF "PINNED" LIVES IN CSS ────────────
-   Same reasoning as components/sections/Lab.tsx, and deliberately the same
+   Same reasoning as the Process tablist, and deliberately the same
    mechanism so there is one pinning pattern in this codebase rather than two.
    `position: sticky` holds the diagram with no scroll listener, survives
    resize with no refresh, and cannot desynchronise from the scrollbar because

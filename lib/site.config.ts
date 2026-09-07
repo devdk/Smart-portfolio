@@ -35,10 +35,12 @@ export const site = {
   /* ---- Contact. -------------------------------------------------------- */
   email: 'okkdheeraj@gmail.com',
   links: {
-    /* The CV lists location, email, LinkedIn, website and phone — no GitHub
-       profile URL. Left as a placeholder rather than inferred from a repo
-       link, because guessing a profile URL is inventing a fact. */
-    github: '[YOUR GITHUB URL]',
+    /* The CV lists no GitHub profile, so this sat as a placeholder rather than
+       being inferred from the repo link on the Studio project — guessing a
+       profile URL from a repo URL is still guessing. Confirmed directly when
+       Dheeraj pushed this codebase to github.com/devdk, which also matches the
+       Voiceover-Video-Generator repo already linked from that case study. */
+    github: 'https://github.com/devdk',
     linkedin: 'https://linkedin.com/in/dheerajheree',
     resume: '/dheeraj-kumar-cv.pdf',
   },

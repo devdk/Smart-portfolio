@@ -44,14 +44,14 @@ export const INVENTORY: InventoryGroup[] = [
     label: 'Freelance client projects',
     count: 16,
     approximate: true,
-    note: 'WordPress, WooCommerce, Shopify and Bootstrap, for clients in Canada, the US and the UK.',
+    note: 'WordPress, WooCommerce, Shopify and Bootstrap — Canada, the US, the UK.',
   },
   {
     id: 'agency',
     label: 'Agency collaborations',
     count: 12,
     approximate: true,
-    note: 'Delivered alongside designers and project managers, on their timelines.',
+    note: 'Alongside designers and project managers, on their timelines.',
   },
   {
     /* Was "Products of my own", which stopped being true once the attribution
@@ -64,7 +64,7 @@ export const INVENTORY: InventoryGroup[] = [
     label: 'Systems built end to end',
     count: 4,
     approximate: false,
-    note: 'From data model to deployment to support, as the only developer on each. These have full case studies.',
+    note: 'Data model to deployment to support, as the only developer on each.',
   },
 ]
 
@@ -108,3 +108,48 @@ export const RANGE_PAIRS: RangePair[] = [
     to: 'a video pipeline that renders in minutes',
   },
 ]
+
+/* --------------------------------------------------------------------------
+   WHICH GROUP EACH NAMED PROJECT SITS IN
+
+   The evidence rows draw one cell per project in each group, so every named
+   project needs a row to stand in. This is the assignment, and it is
+   editorial rather than derivable — which is why it lives here beside the
+   counts rather than being inferred from a field.
+
+   ── THE OVERLAP, HANDLED HONESTLY ─────────────────────────────────────────
+
+   The CRM and the lead engine are BOTH agency-delivered work and
+   systems-built-end-to-end. The CV counts them under both headings, which is
+   exactly why no total is ever printed.
+
+   They are placed once, in `products`, because that is the more specific and
+   more interesting claim: "delivered through an agency" describes how the work
+   arrived, "built end to end as the only developer" describes what it was.
+   The agency row's own count is the CV's figure and already includes them —
+   the unnamed cells in that row absorb the difference.
+
+   A project missing from this map still renders; it simply has no cell of its
+   own, which is the correct behaviour for archive work.
+   -------------------------------------------------------------------------- */
+
+export type GroupId = 'freelance' | 'agency' | 'products'
+
+export const PROJECT_GROUP: Record<string, GroupId> = {
+  /* Independent — the one project on the site not done at Mirasphere. */
+  'allure-dental': 'freelance',
+
+  /* Agency delivery, for a client of Mirasphere's or for Mirasphere itself. */
+  'chefs-and-homes': 'agency',
+  zyvren: 'agency',
+  'women-wellness-first': 'agency',
+  mariforce: 'agency',
+  'swann-bookkeeping': 'agency',
+  'mirasphere-site': 'agency',
+
+  /* Built end to end, sole developer, data model to deployment. */
+  crm: 'products',
+  leadhouse: 'products',
+  'ads-analyser': 'products',
+  studio: 'products',
+}

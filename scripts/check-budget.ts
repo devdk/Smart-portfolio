@@ -47,6 +47,7 @@ const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ROUTES = [
   '/',
   '/work',
+  '/work?view=map',
   '/thinking',
   '/cv',
   '/about',

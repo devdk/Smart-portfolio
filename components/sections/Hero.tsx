@@ -2,7 +2,7 @@ import { site } from '@/lib/site.config'
 import { hasProjectPage, projects } from '@/lib/content'
 import { ButtonLink, Container, Meta, StatusDot } from '@/components/primitives'
 import { RangeStatement } from '@/components/interactive/RangeStatement'
-import { EvidenceWall } from '@/components/interactive/EvidenceWall'
+import { Evidence } from '@/components/sections/Evidence'
 import { MagneticCta } from '@/components/interactive/MagneticCta'
 
 /* ==========================================================================
@@ -67,20 +67,6 @@ export function Hero() {
           <RangeStatement />
         </div>
 
-        {/* The brief about him. Every clause is a fact from the CV, and the
-            full range is named here in prose so the cycling heading above is
-            never the only way to learn it. */}
-        <p
-          data-hero-fade
-          style={{ '--hero-index': 2 } as React.CSSProperties}
-          className="mt-7 max-w-xl text-[1rem] leading-relaxed text-ink-2"
-        >
-          Four years, three continents, and a habit that has not changed since the first
-          freelance client: understand the problem, build the thing, own it end to end.
-          These days that means practice software, lead engines and video pipelines — and
-          still the occasional WordPress site, because both ends of the job are worth doing
-          properly.
-        </p>
 
         <div
           data-hero-fade
@@ -98,23 +84,19 @@ export function Hero() {
         </div>
       </Container>
 
-      {/* The surprise: breadth, felt before it is read. */}
+      {/* The proof. Straight after the buttons — a first-time visitor should
+          reach real work without reading a paragraph first. */}
       <Container className="mt-14 lg:mt-16">
         <div
           data-hero-fade
           style={{ '--hero-index': 4 } as React.CSSProperties}
-          className="mb-5 flex flex-wrap items-baseline justify-between gap-3"
+          className="mb-6"
         >
           <Meta>Everything shipped so far</Meta>
-          <Meta className="normal-case tracking-normal text-ink-3">
-            {/* Derived, not typed. This read "Four have case studies" while
-                eleven projects had pages — a hand-written count on a growing
-                list is wrong the moment the list grows. */}
-            {caseStudyCount} have full case studies, {writtenUpCount - caseStudyCount} more are
-            written up. The rest was client work.
-          </Meta>
         </div>
-        <EvidenceWall />
+        <div data-hero-fade style={{ '--hero-index': 5 } as React.CSSProperties}>
+          <Evidence />
+        </div>
       </Container>
     </section>
   )

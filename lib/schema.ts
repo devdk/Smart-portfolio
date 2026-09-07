@@ -251,6 +251,30 @@ export const projectSchema = z
     client: z.string().optional(),
     clientDescriptor: z.string().optional(),
 
+    /* ── TWO FIELDS THAT EXIST FOR THE KNOWLEDGE GRAPH ──────────────────────
+
+       Both of these facts were already true and already on the site — but only
+       inside prose. "Built at Mirasphere Digital" lived in the `role` string
+       and in a context paragraph; "an accounting firm" lived in a sentence.
+
+       Prose is unqueryable. A graph asked "which clients did he work with at
+       Mirasphere?" or "what has he built for accounting firms?" has to either
+       read them out of a typed field or infer them by matching strings against
+       paragraphs — and an inferred edge on a page about named real clients is
+       exactly the kind of claim this codebase refuses to make.
+
+       So these are declarations, not derivations. Nothing here is new
+       information; it is information moved from a place that could not be
+       traversed to one that can. */
+
+    /** The organisation the work was done at, when it was not independent.
+        Absent means freelance or independent. */
+    employer: z.string().optional(),
+
+    /** The client's sector, in the plainest word that is true. Lets the graph
+        answer "what has he built for X-type businesses" without guessing. */
+    clientIndustry: z.string().optional(),
+
     url: urlOrPlaceholder.optional(),
     repo: urlOrPlaceholder.optional(),
 

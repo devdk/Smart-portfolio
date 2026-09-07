@@ -3,40 +3,57 @@
 import { useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { site } from '@/lib/site.config'
-import { Button, Meta, cx } from '@/components/primitives'
+import { cx } from '@/components/primitives'
 import type { AskChunk } from '@/content/ask-corpus'
 import type { Answer } from '@/lib/retrieval'
 
 /* ==========================================================================
-   ASK CONSOLE — the interactive island of components/sections/AskPortfolio.tsx
+   ASK — the interactive island
 
-   Everything static lives in that server component; this is the part that has
-   to run in the browser: an input, four suggestions, and a transcript.
+   ── WHAT CHANGED, AND WHY ─────────────────────────────────────────────────
 
-   ── WHY THE INDEX IS IMPORTED AT RUNTIME AND NOT AT THE TOP ────────────────
-   Both imports above are TYPE-ONLY, which means they are erased at compile time
-   and cost nothing. lib/retrieval carries the corpus — 73 chunks of prose plus
-   the term tables built from it — and a static import would put all of it in
-   this route's first-load JavaScript. Measured: 32.8 KB of app code against a
-   25 KB budget, paid by every visitor whether or not they ask anything.
+   This was a terminal. Mono type throughout, a "search the corpus" button, and
+   every answer trailed by `matched: build crm · bm25 4.60`. To an engineer that
+   read as transparency. To a recruiter or a shop owner it read as a developer
+   tool they had wandered into by mistake, and they are two of the three people
+   this site most needs to convince.
 
-   So the module is fetched on first use, in one chunk, and cached in a
-   module-scope promise for the rest of the session. The cost lands on the
-   people who use the feature, which is the only place it belongs. It is also
-   warmed on focus and on hover, so by the time a question is finished being
-   typed the index is usually already there.
+   The machinery did not change — same scorer, same corpus, same refusal floor.
+   What changed is who the surface is addressed to:
 
-   ── WHY THIS IS NOT A SERVER ACTION ────────────────────────────────────────
-   Scoring on the server would keep the corpus off the client entirely and cost
-   less again. It would also put a network round trip between a keystroke and an
-   answer that takes microseconds to compute, and make the feature stop working
-   offline — for a static site whose whole claim is that everything on it is
-   inspectable, shipping the index and doing the arithmetic in front of the
-   visitor is worth 10 KB. Open the network tab: the chunk that arrives is the
-   corpus, and the answer is not a response from anywhere.
+     - the question and the answer are in normal prose at reading size
+     - the numbers are behind a disclosure, not printed under every answer
+     - the pipeline explanation moved to the section around this island, also
+       behind a disclosure, so the people who want it can have all of it and
+       nobody else is shown a diagram they did not ask for
+
+   ── WHY THE CITATION IS STILL VISIBLE WHEN THE SOURCE IS NOT ──────────────
+
+   Sources are collapsed by default, which was the right call. But the FACT of
+   a citation stays on screen, as one chip naming the page the sentence came
+   from. That is not decoration: the section's headline claim is that there is
+   no model and therefore nothing invented, and a claim like that is only
+   believable if every answer visibly points at something. Hide the citation
+   entirely and the headline becomes marketing.
+
+   ── WHY A REFUSAL IS DESIGNED AS CAREFULLY AS AN ANSWER ───────────────────
+
+   "No model, no hallucination" is unfalsifiable if the thing answers
+   everything. The refusals are the proof — so they get a real design: what it
+   could not find, what it CAN answer, and a way to just ask him. A dead end
+   becomes the most qualified contact prompt on the site, because the person
+   reading it has already been told the answer isn't published.
+
+   ── WHY THE INDEX IS STILL FETCHED ON FIRST USE ───────────────────────────
+
+   Unchanged, and still the right call. Both imports above are type-only and
+   erased at compile time. lib/retrieval carries the corpus and its term tables;
+   a static import measured 32.8 KB of app code against a 25 KB budget, paid by
+   every visitor whether they asked anything or not. It loads on first use and
+   is warmed on focus and hover, so the one real wait usually happens while the
+   question is still being typed.
    ========================================================================== */
 
-/** Loaded once, then reused. `??=` so concurrent calls share one request. */
 let indexPromise: Promise<typeof import('@/lib/retrieval')> | null = null
 
 function loadIndex(): Promise<typeof import('@/lib/retrieval')> {
@@ -47,37 +64,32 @@ function loadIndex(): Promise<typeof import('@/lib/retrieval')> {
 /**
  * The suggested questions.
  *
- * All four are probes in the answerable half of scripts/check-retrieval.ts, so
- * `npm run check:retrieval` fails the build if any of them ever stops being
- * answerable. A suggestion chip that refuses is the worst possible first
- * impression — it teaches the visitor the feature is broken — so these are not
- * aspirational examples, they are gated behaviour.
+ * Every one is a probe in the answerable half of scripts/check-retrieval.ts,
+ * so `npm run check:retrieval` fails the build if any of them stops being
+ * answerable. A suggestion that refuses is the worst possible first impression
+ * — it teaches the visitor the feature is broken — so these are gated
+ * behaviour, not aspirational examples.
+ *
+ * Chosen to span the audience rather than to show off: one for someone judging
+ * engineering, one for someone judging range, one for a sceptic, one for a
+ * recruiter.
  */
 const SUGGESTIONS = [
   'What did the security audit find?',
-  'How many endpoints?',
   'Does he know WordPress and React?',
+  'Did he use AI to build the CRM?',
   'Where is he based?',
 ]
 
-/** Most recent first, and capped: an unbounded transcript would grow the page
-    under the reader while they are reading it. Six is more than anyone asks. */
 const TRANSCRIPT_LIMIT = 6
 
-type Exchange = {
-  id: number
-  question: string
-  result: Answer
-}
+type Exchange = { id: number; question: string; result: Answer }
 
 export function AskConsole({ chunks, floor }: { chunks: number; floor: number }) {
   const [query, setQuery] = useState('')
   const [transcript, setTranscript] = useState<Exchange[]>([])
   const [loading, setLoading] = useState(false)
 
-  /* A counter rather than an array index or a timestamp: the key has to stay
-     stable as older exchanges fall off the end of the list, and Date.now()
-     collides when two chips are clicked inside the same millisecond. */
   const counter = useRef(0)
   const inputId = useId()
 
@@ -85,9 +97,6 @@ export function AskConsole({ chunks, floor }: { chunks: number; floor: number })
     const trimmed = question.trim()
     if (trimmed.length === 0) return
 
-    /* Only ever true while the index itself is in flight, and only on the first
-       question of a session. Scoring is synchronous once it has arrived — there
-       is nothing to wait for and so nothing to animate. */
     setLoading(indexPromise === null)
     try {
       const { answer } = await loadIndex()
@@ -104,121 +113,124 @@ export function AskConsole({ chunks, floor }: { chunks: number; floor: number })
     }
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-    void ask(query)
-  }
-
   return (
-    <>
-      <form onSubmit={onSubmit}>
-        <label htmlFor={inputId} className="block text-[0.9375rem] text-ink">
-          Ask a question about Dheeraj's work
+    <div>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          void ask(query)
+        }}
+      >
+        <label htmlFor={inputId} className="sr-only">
+          Ask a question about Dheeraj&rsquo;s work
         </label>
-        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+
+        {/* One field, generously sized, with the action inside it. The old
+            version put a "Search the corpus" button beside a mono input, which
+            described the mechanism instead of inviting a question. */}
+        <div className="group relative">
           <input
             id={inputId}
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            /* Warm the index the moment there is any sign it will be wanted, so
-               the one real wait usually happens while the visitor is still
-               typing. Harmless if it never gets used: one cached chunk. */
             onFocus={() => void loadIndex()}
-            placeholder="try: what did the security audit find?"
+            placeholder="Ask anything about his work…"
             autoComplete="off"
-            spellCheck={false}
             className={cx(
-              'min-w-0 flex-1 rounded-[var(--radius-sm)] border border-hairline bg-white/[0.03]',
-              'px-3 py-2.5 font-mono text-[0.8125rem] text-ink placeholder:text-ink-3',
-              'focus:border-accent/50 focus:outline-none',
+              'w-full rounded-full border border-hairline-strong bg-canvas',
+              'py-4 pl-6 pr-32 text-[1.0625rem] text-ink placeholder:text-ink-3',
+              'transition-colors duration-[var(--duration-ui)]',
+              'focus:border-accent/60 focus:outline-none',
             )}
           />
-          <Button type="submit" variant="secondary" size="md">
-            Search the corpus
-          </Button>
+          <button
+            type="submit"
+            className={cx(
+              'absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-5 py-2.5',
+              'bg-accent text-[0.9375rem] font-medium text-[var(--color-accent-ink)]',
+              'transition-opacity duration-[var(--duration-micro)] hover:opacity-90',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+            )}
+          >
+            Ask
+          </button>
         </div>
       </form>
 
-      <div className="mt-4">
-        <Meta as="p" className="mb-2 block">
-          questions this corpus answers
-        </Meta>
-        <ul className="flex flex-wrap gap-2">
-          {SUGGESTIONS.map((suggestion) => (
-            <li key={suggestion}>
-              <button
-                type="button"
-                onClick={() => void ask(suggestion)}
-                onPointerEnter={() => void loadIndex()}
-                className={cx(
-                  'rounded-full border border-hairline bg-white/[0.03] px-3 py-1.5',
-                  'font-mono text-[0.75rem] text-ink-2',
-                  'transition-colors duration-[var(--duration-micro)] ease-[var(--ease-micro)]',
-                  'hover:border-hairline-strong hover:text-ink',
-                )}
-              >
-                {suggestion}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Suggestions in sentence case, in the body face. As mono chips they
+          read as commands to be typed rather than questions to be clicked. */}
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {SUGGESTIONS.map((suggestion) => (
+          <li key={suggestion}>
+            <button
+              type="button"
+              onClick={() => void ask(suggestion)}
+              onPointerEnter={() => void loadIndex()}
+              className={cx(
+                'rounded-full border border-hairline px-3.5 py-2 text-[0.875rem] text-ink-2',
+                'transition-colors duration-[var(--duration-micro)]',
+                'hover:border-hairline-strong hover:text-ink',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+              )}
+            >
+              {suggestion}
+            </button>
+          </li>
+        ))}
+      </ul>
 
-      {/* role="log" rather than status: this is an append-only transcript, and a
-          log is announced as it grows without interrupting whatever the reader is
-          already hearing. The loading line lives inside it so the one real wait
-          is announced too. */}
-      <div
-        role="log"
-        aria-live="polite"
-        aria-label="Answers"
-        className="mt-7 border-t border-hairline pt-6"
-      >
+      <div role="log" aria-live="polite" aria-label="Answers" className="mt-8">
         {loading ? (
-          <p className="mb-4 font-mono text-[0.8125rem] text-ink-3">
-            fetching the index · {chunks} chunks, once, then it stays in memory
+          <p className="text-[0.9375rem] text-ink-3">
+            Loading the index — {chunks} passages, once.
           </p>
         ) : null}
 
-        {transcript.length === 0 ? (
-          <p className="max-w-2xl text-[0.9375rem] leading-relaxed text-ink-2">
-            Answers appear here, quoted exactly and attributed. The scorer matches words rather
-            than meaning — there is no encoder in the page to turn your question into a vector —
-            so naming a technology, a project or a period works better than asking it to infer.
+        {transcript.length === 0 && !loading ? (
+          <p className="max-w-xl text-[0.9375rem] leading-relaxed text-ink-3">
+            It matches the words you use rather than the meaning behind them, so naming a
+            technology, a project or a client works better than asking it to infer.
           </p>
-        ) : (
-          <ol className="space-y-6">
+        ) : null}
+
+        {transcript.length > 0 ? (
+          <ol className="flex flex-col gap-8">
             {transcript.map((exchange) => (
               <li key={exchange.id}>
-                <ExchangeView exchange={exchange} floor={floor} />
+                <ExchangeView exchange={exchange} floor={floor} onAsk={(q) => void ask(q)} />
               </li>
             ))}
           </ol>
-        )}
+        ) : null}
       </div>
-    </>
+    </div>
   )
 }
 
 /* --- One exchange --------------------------------------------------------- */
 
-function ExchangeView({ exchange, floor }: { exchange: Exchange; floor: number }) {
+function ExchangeView({
+  exchange,
+  floor,
+  onAsk,
+}: {
+  exchange: Exchange
+  floor: number
+  onAsk: (question: string) => void
+}) {
   const { question, result } = exchange
 
   return (
     <article>
-      <p className="text-[0.9375rem] leading-relaxed text-ink-2">
-        <span className="font-mono text-ink-3">you asked · </span>
-        {question}
-      </p>
+      <p className="text-[1rem] font-medium leading-snug text-ink-2">{question}</p>
 
       {result.kind === 'answer' ? (
-        <>
-          {/* A blockquote, because it IS a quotation: the same sentence, from the
-              page named underneath it. Nothing here was written for this
-              answer. */}
-          <blockquote className="mt-3 border-l-2 border-accent/50 pl-4">
+        <div className="mt-3">
+          {/* A blockquote because it IS a quotation — the same sentence, from
+              the page named below it. Nothing here was written for this
+              answer, which is the entire claim. */}
+          <blockquote className="border-l-2 border-accent/50 pl-4">
             {result.sentences.map((sentence) => (
               <p key={sentence} className="text-[1.0625rem] leading-relaxed text-ink">
                 {sentence}
@@ -226,77 +238,142 @@ function ExchangeView({ exchange, floor }: { exchange: Exchange; floor: number }
             ))}
           </blockquote>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-            <Meta>sources</Meta>
-            {result.sources.map((source, index) => (
-              <SourceChip key={source.id} chunk={source} quoted={index === 0} />
-            ))}
-          </div>
-
-          <p className="mt-2 font-mono text-[0.75rem] leading-relaxed text-ink-3">
-            matched: {result.matchedTerms.join(' ')} · bm25 {result.score.toFixed(2)} · quoted from
-            the first source
-          </p>
-        </>
+          <Provenance result={result} />
+        </div>
       ) : (
-        <div className="mt-3 rounded-[var(--radius-sm)] border border-dashed border-hairline-strong px-4 py-3.5">
-          <Meta className="mb-1.5 block">no answer in the corpus</Meta>
-          <p className="text-[0.9375rem] leading-relaxed text-ink-2">{result.reason}</p>
-          <p className="mt-2.5 text-[0.9375rem] text-ink-2">
-            Ask him directly:{' '}
+        <div className="mt-3 rounded-[var(--radius-md)] border border-hairline bg-white/[0.02] p-5">
+          <p className="text-[1rem] leading-relaxed text-ink">
+            That isn&rsquo;t written down anywhere on this site.
+          </p>
+          <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-2">{result.reason}</p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link
+              href="/contact"
+              className={cx(
+                'rounded-full bg-accent px-4 py-2 text-[0.875rem] font-medium',
+                'text-[var(--color-accent-ink)] transition-opacity hover:opacity-90',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+              )}
+            >
+              Ask him directly
+            </Link>
             <a
               href={`mailto:${site.email}`}
-              className="text-accent underline decoration-1 underline-offset-[3px] transition-opacity duration-[var(--duration-micro)] hover:opacity-75"
+              className="text-[0.875rem] text-ink-3 underline decoration-hairline-strong underline-offset-2 transition-colors hover:text-ink"
             >
               {site.email}
             </a>
-          </p>
-          <p className="mt-2 font-mono text-[0.75rem] text-ink-3">
-            best score {result.score.toFixed(2)} · floor {floor.toFixed(2)}
-          </p>
+          </div>
+
+          {/* What it CAN answer, so a refusal is a redirection rather than a
+              closed door. */}
+          <div className="mt-4 border-t border-hairline pt-4">
+            <p className="mb-2 text-[0.8125rem] text-ink-3">Things it does know:</p>
+            <ul className="flex flex-wrap gap-2">
+              {SUGGESTIONS.slice(0, 3).map((suggestion) => (
+                <li key={suggestion}>
+                  <button
+                    type="button"
+                    onClick={() => onAsk(suggestion)}
+                    className="rounded-full border border-hairline px-3 py-1.5 text-[0.8125rem] text-ink-2 transition-colors hover:border-hairline-strong hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  >
+                    {suggestion}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <details className="mt-4">
+            <summary className="cursor-pointer text-[0.8125rem] text-ink-3 transition-colors hover:text-ink-2">
+              Why it declined
+            </summary>
+            <p className="mt-2 font-mono text-[0.75rem] leading-relaxed text-ink-3">
+              best match scored {result.score.toFixed(2)}, below the floor of {floor.toFixed(2)}.
+              Under that threshold it declines instead of quoting the closest thing it found.
+            </p>
+          </details>
         </div>
       )}
     </article>
   )
 }
 
-/* --- Citation chip -------------------------------------------------------
-   A link when the text has a page, a plain chip when it does not. Two of the
-   corpus's sources — the MERN store and the Virtuoso dashboards — are CV
-   entries with no case study, and a chip that looks like a link and lands on a
-   404 is worse than one that admits it goes nowhere.                       */
+/* --- Provenance ----------------------------------------------------------
+   One chip naming where the sentence came from, and a disclosure for
+   everything else. The chip is never hidden; the arithmetic always is.      */
 
-function SourceChip({ chunk, quoted }: { chunk: AskChunk; quoted: boolean }) {
+function Provenance({ result }: { result: Extract<Answer, { kind: 'answer' }> }) {
+  const quoted = result.sources[0]
+  if (!quoted) return null
+
+  const others = result.sources.slice(1)
+
+  return (
+    <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <SourceChip chunk={quoted} quoted />
+
+      {others.length > 0 || result.matchedTerms.length > 0 ? (
+        <details className="group/details">
+          <summary className="cursor-pointer list-none text-[0.8125rem] text-ink-3 transition-colors hover:text-ink-2">
+            <span className="underline decoration-hairline-strong underline-offset-2">
+              How it found this
+            </span>
+          </summary>
+          <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--radius-sm)] border border-hairline bg-white/[0.02] p-3.5">
+            <p className="font-mono text-[0.75rem] leading-relaxed text-ink-3">
+              matched on {result.matchedTerms.join(', ')} · score{' '}
+              {result.score.toFixed(2)} · quoted verbatim from the first source
+            </p>
+            {others.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {others.map((source) => (
+                  <SourceChip key={source.id} chunk={source} />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </details>
+      ) : null}
+    </div>
+  )
+}
+
+/* A link when the text has a page, a plain chip when it does not. Some corpus
+   sources are CV entries with no case study, and a chip that looks like a link
+   and lands on a 404 is worse than one that admits it goes nowhere. */
+function SourceChip({ chunk, quoted = false }: { chunk: AskChunk; quoted?: boolean }) {
   const shared =
-    'inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[0.75rem]'
-  const tone = quoted ? 'border-accent/40 bg-accent/10' : 'border-hairline bg-white/[0.03]'
+    'inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-[0.8125rem]'
+  const tone = quoted ? 'border-accent/40 bg-accent/[0.08]' : 'border-hairline bg-white/[0.03]'
 
   const inner = (
     <>
-      <span className={cx('shrink-0', quoted ? 'text-accent' : 'text-ink-2')}>{chunk.source}</span>
-      {/* min-w-0 is what makes `truncate` work inside a flex row: without it the
-          label refuses to shrink below its content width and the chip wraps
-          instead of clipping. */}
-      <span className="min-w-0 truncate text-ink-3">{chunk.label}</span>
+      <span aria-hidden="true" className={cx('shrink-0', quoted ? 'text-accent' : 'text-ink-3')}>
+        ↳
+      </span>
+      <span className="min-w-0 truncate text-ink-2">{chunk.label}</span>
     </>
   )
 
   if (chunk.href === null) {
-    return <span className={cx(shared, tone)}>{inner}</span>
+    return (
+      <span className={cx(shared, tone)}>
+        <span className="sr-only">Quoted from: </span>
+        {inner}
+      </span>
+    )
   }
 
   return (
     <Link
       href={chunk.href}
-      className={cx(
-        shared,
-        tone,
-        'transition-colors duration-[var(--duration-micro)] ease-[var(--ease-micro)]',
-        'hover:border-hairline-strong',
-      )}
+      className={cx(shared, tone, 'transition-colors duration-[var(--duration-micro)] hover:border-hairline-strong')}
     >
+      <span className="sr-only">Quoted from: </span>
       {inner}
-      <span className="sr-only"> — read this in context</span>
+      <span className="sr-only"> — read it in context</span>
     </Link>
   )
 }

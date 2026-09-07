@@ -956,11 +956,61 @@ const ALL_PLACEHOLDERS = /\[[^\]]+\]/g
 
 type Withheld = { topic: string; terms: string[]; reason: string }
 
+/* ── CURATED WITHHOLDINGS ──────────────────────────────────────────────────
+
+   The derived entries below come from unresolved CV fields. These are
+   different: subjects that are DELIBERATELY not published, where a retrieval
+   result is worse than a written response.
+
+   Both exist because scripts/ask-gaps.ts caught them answering wrongly, and
+   neither could be fixed by tuning the scorer — each matched a rare word used
+   in a different sense, which is a limit of lexical matching rather than a
+   badly chosen threshold:
+
+     "what does he charge?"  matched "the paid lead platforms ... charge per lead"
+     "has he led a team?"    matched "done end to end with their team"
+
+   The first is commercially sensitive and the second is a claim about his
+   career. Getting either wrong costs more than declining, and a curated
+   sentence beats both a wrong quote and a bare refusal — a question about
+   rates should end with a reason to make contact, not a dead end.
+
+   An entry fires only when EVERY term is present in the question, so these are
+   narrow by construction. */
+const CURATED_WITHHELD: Withheld[] = [
+  ...['charge', 'rate', 'rates', 'price', 'pricing', 'cost', 'quote', 'hourly', 'budget'].map(
+    (term) => ({
+      topic: 'rates',
+      terms: [term],
+      reason:
+        'Rates are not published here — they depend on scope, and a number quoted without ' +
+        'knowing yours would be a guess. Tell Dheeraj what you need and you will get a real ' +
+        'one.',
+    }),
+  ),
+  ...[
+    ['led', 'team'],
+    ['lead', 'team'],
+    ['leading', 'team'],
+    ['manage', 'team'],
+    ['managed', 'team'],
+    ['team', 'size'],
+  ].map((terms) => ({
+    topic: 'leading a team',
+    terms,
+    reason:
+      'Nothing on this site describes leading a team. The projects here are sole-developer ' +
+      'work, built end to end, and several were delivered alongside a client’s own developers ' +
+      'and designers — which is collaboration rather than management. If team leadership is ' +
+      'what you need, ask him directly rather than reading it into this.',
+  })),
+]
+
 async function buildWithheld(): Promise<Withheld[]> {
   const { site } = await import('../lib/site.config')
   const stopwords = new Set(['to', 'in', 'of', 'or', 'and', 'the', 'a', 'an'])
 
-  const out: Withheld[] = []
+  const out: Withheld[] = [...CURATED_WITHHELD]
   for (const field of site.cv.logistics) {
     if (!HAS_PLACEHOLDER.test(field.value)) continue
 

@@ -12,7 +12,7 @@
                 on the same page. 8 are excluded; the reasons are listed
                 against each id below.
      192 chunks  cut here from the site's own current content: the about
-                page and the 11 case studies. 61781 characters of prose
+                page and the 11 case studies. 61791 characters of prose
                 that is published on a route a visitor can open and check.
 
    Nothing in here is written by the build. One chunk is TEMPLATED from
@@ -647,70 +647,70 @@ export const ASK_SUPPLEMENT: AskChunk[] = [
     "id": "work/swann-bookkeeping-83",
     "source": "work/swann-bookkeeping",
     "href": "/work/swann-bookkeeping",
-    "label": "Swann Bookkeeping & Accountancy",
-    "text": "Swann Bookkeeping & Accountancy. A London accountancy firm’s services, made legible to the businesses that need them. Role: Sole developer, end to end — at Mirasphere Digital, for an agency client. Status: live, 2025. Built for Swann Bookkeeping & Accountancy. Stack: WordPress, Elementor, Slider Revolution."
+    "label": "Swann Bookkeeping — Website",
+    "text": "Swann Bookkeeping — Website. A London accountancy firm’s services, made legible to the businesses that need them. Role: Sole developer, end to end — at Mirasphere Digital, for an agency client. Status: live, 2025. Built for Swann Bookkeeping & Accountancy. Stack: WordPress, Elementor, Slider Revolution."
   },
   {
     "id": "work/swann-bookkeeping-84",
     "source": "work/swann-bookkeeping",
     "href": "/work/swann-bookkeeping",
-    "label": "Swann Bookkeeping & Accountancy — context",
+    "label": "Swann Bookkeeping — Website — context",
     "text": "Swann is a London bookkeeping and accountancy firm serving sole traders, limited companies and charities — bookkeeping, self-assessment, payroll, CIS and PAYE, VAT registration, corporation tax and tax planning. They positioned themselves as their clients’ behind-the-scenes finance team, and they already had a site."
   },
   {
     "id": "work/swann-bookkeeping-85",
     "source": "work/swann-bookkeeping",
     "href": "/work/swann-bookkeeping",
-    "label": "Swann Bookkeeping & Accountancy — the problem",
+    "label": "Swann Bookkeeping — Website — the problem",
     "text": "Accountancy services are hard to tell apart from the outside. A small business owner cannot easily work out which of seven overlapping services they need, and a site that lists them without explaining them loses the enquiry to whoever explains it better."
   },
   {
     "id": "work/swann-bookkeeping-86",
     "source": "work/swann-bookkeeping",
     "href": "/work/swann-bookkeeping",
-    "label": "Swann Bookkeeping & Accountancy — approach",
+    "label": "Swann Bookkeeping — Website — approach",
     "text": "Rebuild around the services as the spine of the site: each one given its own explanation rather than a line in a list, a four-step process section so a prospective client can see what working together actually looks like, and testimonials in the path rather than parked on a separate page."
   },
   {
     "id": "work/swann-bookkeeping-87",
     "source": "work/swann-bookkeeping",
     "href": "/work/swann-bookkeeping",
-    "label": "Swann Bookkeeping & Accountancy — outcome",
+    "label": "Swann Bookkeeping — Website — outcome",
     "text": "The firm’s services are legible to a non-accountant, and the enquiry path from a service page to a booked consultation is one click."
   },
   {
     "id": "work/mirasphere-site-88",
     "source": "work/mirasphere-site",
     "href": "/work/mirasphere-site",
-    "label": "Mirasphere Digital",
-    "text": "Mirasphere Digital. The agency’s own site — the one where the work has to argue for itself. Role: Developer and technical SEO — the agency’s own site, built in-house. Status: live, 2025. Built for Mirasphere Digital, as the agency’s own site rather than a client project. Stack: WordPress, Elementor, Technical SEO."
+    "label": "Mirasphere Digital — Agency Site",
+    "text": "Mirasphere Digital — Agency Site. The agency’s own site — the one where the work has to argue for itself. Role: Developer and technical SEO — the agency’s own site, built in-house. Status: live, 2025. Built for Mirasphere Digital, as the agency’s own site rather than a client project. Stack: WordPress, Elementor, Technical SEO."
   },
   {
     "id": "work/mirasphere-site-89",
     "source": "work/mirasphere-site",
     "href": "/work/mirasphere-site",
-    "label": "Mirasphere Digital — context",
+    "label": "Mirasphere Digital — Agency Site — context",
     "text": "Mirasphere Digital is the agency I have worked at since April 2025, running social, PPC, SEO, email, web and influencer work out of London and Gurugram. This is their own website."
   },
   {
     "id": "work/mirasphere-site-90",
     "source": "work/mirasphere-site",
     "href": "/work/mirasphere-site",
-    "label": "Mirasphere Digital — the problem",
+    "label": "Mirasphere Digital — Agency Site — the problem",
     "text": "An agency site is the one build where the audience is professionally sceptical. It has to demonstrate the services rather than describe them — and an agency selling search cannot afford a site that underperforms on search."
   },
   {
     "id": "work/mirasphere-site-91",
     "source": "work/mirasphere-site",
     "href": "/work/mirasphere-site",
-    "label": "Mirasphere Digital — approach",
+    "label": "Mirasphere Digital — Agency Site — approach",
     "text": "Interaction per service rather than a shared template: each service page carries a before-and-after comparison that shows the difference the work makes, which is a demonstration rather than a claim. Then the technical SEO on the site itself, on the principle that an agency’s own site is the first sample of its work anyone sees."
   },
   {
     "id": "work/mirasphere-site-92",
     "source": "work/mirasphere-site",
     "href": "/work/mirasphere-site",
-    "label": "Mirasphere Digital — outcome",
+    "label": "Mirasphere Digital — Agency Site — outcome",
     "text": "It is the agency’s live site, carrying their services, their client roster and their free-audit offer as the conversion path."
   },
   {
@@ -1426,6 +1426,117 @@ export const ASK_CHUNKS: AskChunk[] = [...INDEXED, ...ASK_SUPPLEMENT]
    Virtuoso, which the corpus answers perfectly well. */
 export const ASK_WITHHELD: { topic: string; terms: string[]; reason: string }[] = [
   {
+    "topic": "rates",
+    "terms": [
+      "charge"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "rate"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "rates"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "price"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "pricing"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "cost"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "quote"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "hourly"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "rates",
+    "terms": [
+      "budget"
+    ],
+    "reason": "Rates are not published here — they depend on scope, and a number quoted without knowing yours would be a guess. Tell Dheeraj what you need and you will get a real one."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "led",
+      "team"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "lead",
+      "team"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "leading",
+      "team"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "manage",
+      "team"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "managed",
+      "team"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
+    "topic": "leading a team",
+    "terms": [
+      "team",
+      "size"
+    ],
+    "reason": "Nothing on this site describes leading a team. The projects here are sole-developer work, built end to end, and several were delivered alongside a client’s own developers and designers — which is collaboration rather than management. If team leadership is what you need, ask him directly rather than reading it into this."
+  },
+  {
     "topic": "work preference",
     "terms": [
       "work",
@@ -1486,5 +1597,5 @@ export const ASK_STATS = {
   supplement: 192,
   /** The corpus. This is the number the interface is allowed to state. */
   chunks: 207,
-  supplementChars: 61781,
+  supplementChars: 61791,
 } as const

@@ -7,6 +7,11 @@ out/
 # because the capture step needs real internet. The RAW captures are inputs —
 # multi-megabyte PNGs that only exist to be composited — so they stay out.
 public/shots/raw/
+# Files staged for deletion. The cloud session that edits this repo cannot
+# delete on the local disk, so retired components are moved here instead and
+# removed by hand. They are never part of a commit.
+_to_delete/
+
 .env
 .env.local
 .DS_Store

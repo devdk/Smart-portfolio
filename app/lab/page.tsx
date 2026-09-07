@@ -19,7 +19,7 @@ import { LAB_POINTS, BPE_STATS, PCA_EXPLAINED_VARIANCE } from '@/content/lab-dat
    distinctive URL on the domain, so it is indexed.
 
    ── WHY STACKED AND NOT PINNED ─────────────────────────────────────────────
-   The homepage section (components/sections/Lab.tsx) pins these three as
+   These three were also a pinned, tab-switched block on the homepage until
    three acts, because there they are one argument told in order. Here they are
    three tools someone arrived to use, quite possibly from a search result
    aimed at one of them. Three headings and three panels means every instrument

@@ -12,13 +12,6 @@ import { Process } from '@/components/sections/Process'
 import { AskPortfolio } from '@/components/sections/AskPortfolio'
 import dynamic from 'next/dynamic'
 
-/* The Lab is three interactive instruments and the largest block of client
-   JavaScript on the page, and it sits well below the fold — so it is code-split
-   the same way the closing CTA is. `ssr` stays on by default, so the acts, the
-   corpus list and every caption are in the server-rendered HTML. */
-const Lab = dynamic(() =>
-  import('@/components/sections/Lab').then((m) => ({ default: m.Lab })),
-)
 
 /* Below the fold and the largest client component on the page, so it is
    dynamically imported. `ssr: true` keeps it in the server-rendered HTML for
@@ -67,7 +60,6 @@ export default function Home() {
       <WorkShowcase />
       <ThinkingTeaser />
       <Process />
-      <Lab />
       <AskPortfolio />
       <BuildWithMe />
     </>

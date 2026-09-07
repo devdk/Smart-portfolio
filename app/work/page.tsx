@@ -23,6 +23,7 @@ import {
   cx,
 } from '@/components/primitives'
 import { ProjectCard } from '@/components/sections/ProjectCard'
+import { WorkMap } from '@/components/sections/WorkMap'
 
 /* ==========================================================================
    WORK INDEX
@@ -46,7 +47,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/work' },
 }
 
-type WorkSearchParams = { tech?: string; category?: string }
+type WorkView = 'list' | 'map'
+type WorkSearchParams = { tech?: string; category?: string; view?: string }
 
 /** Builds a /work URL from filter state. Empty values drop out of the query
     entirely, so the unfiltered URL is a clean `/work` rather than
@@ -146,8 +148,43 @@ function Tier({
    prerender.
    -------------------------------------------------------------------------- */
 
+/** List or Map. Two real links, not a button with state — the same rule the
+    filters follow, so a view is shareable, bookmarkable and crawlable. */
+function ViewToggle({ view, tech, category }: { view: WorkView } & WorkSearchParams) {
+  const base = (next: WorkView) => {
+    const params = new URLSearchParams()
+    if (tech) params.set('tech', tech)
+    if (category) params.set('category', category)
+    if (next === 'map') params.set('view', 'map')
+    const query = params.toString()
+    return query ? `/work?${query}` : '/work'
+  }
+
+  return (
+    <div className="flex items-center gap-1 rounded-full border border-hairline p-1">
+      {(['list', 'map'] as const).map((option) => (
+        <Link
+          key={option}
+          href={base(option)}
+          {...(view === option ? { 'aria-current': 'true' as const } : {})}
+          className={cx(
+            'rounded-full px-3.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] transition-colors duration-[var(--duration-micro)]',
+            view === option
+              ? 'bg-accent text-[var(--color-accent-ink)]'
+              : 'text-ink-3 hover:text-ink',
+          )}
+        >
+          {option === 'list' ? 'List' : 'Map'}
+          {view === option ? <span className="sr-only"> (current view)</span> : null}
+        </Link>
+      ))}
+    </div>
+  )
+}
+
 async function FilteredWork({ searchParams }: { searchParams: Promise<WorkSearchParams> }) {
-  const { tech, category } = await searchParams
+  const { tech, category, view: rawView } = await searchParams
+  const view: WorkView = rawView === 'map' ? 'map' : 'list'
 
   const technologies = getAllTechnologies()
   const categories = getAllCategories()
@@ -172,6 +209,7 @@ async function FilteredWork({ searchParams }: { searchParams: Promise<WorkSearch
   const supporting = supportingProjects.filter(matches)
   const archive = archiveProjects.filter(matches)
   const total = flagship.length + supporting.length + archive.length
+  const matchingSlugs = [...flagship, ...supporting, ...archive].map((p) => p.slug)
 
   /* A known category gets its published label; an arbitrary query value is
      echoed back verbatim rather than mapped to something we never claimed.
@@ -190,9 +228,15 @@ async function FilteredWork({ searchParams }: { searchParams: Promise<WorkSearch
     <>
       <Section band aria-labelledby="filters-heading">
         <Container>
-          <h2 id="filters-heading" className="mb-8">
-            <Meta>Filter</Meta>
-          </h2>
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <h2 id="filters-heading">
+              <Meta>Filter</Meta>
+            </h2>
+            {/* The filters apply to BOTH views, which is the point of making
+                the map a view rather than a page: "show me the Shopify work,
+                as a map" is one URL. */}
+            <ViewToggle view={view} tech={activeTech} category={activeCategory} />
+          </div>
 
           <div className="flex flex-col gap-7">
             <div>
@@ -282,6 +326,21 @@ async function FilteredWork({ searchParams }: { searchParams: Promise<WorkSearch
         </Container>
       </Section>
 
+      {view === 'map' ? (
+        <Section aria-labelledby="map-heading">
+          <Container>
+            <SectionHeading
+              index="Map"
+              id="map-heading"
+              title="The same work, and how it connects."
+              lead="Click any node to follow it. Clients, employers, technologies, decisions and the failures attached to each project — including the one client who came back, which no single project page says."
+              className="mb-8 md:mb-10"
+            />
+            <WorkMap projects={matchingSlugs} />
+          </Container>
+        </Section>
+      ) : (
+        <>
       <Tier
         index="01 — Flagship"
         id="tier-flagship"
@@ -307,9 +366,13 @@ async function FilteredWork({ searchParams }: { searchParams: Promise<WorkSearch
         size="sm"
         columns={3}
       />
+        </>
+      )}
     </>
   )
 }
+
+
 
 export default function WorkPage({ searchParams }: { searchParams: Promise<WorkSearchParams> }) {
   return (

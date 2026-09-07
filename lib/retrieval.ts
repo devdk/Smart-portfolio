@@ -115,6 +115,16 @@ export const BM25_B = 0.75
  */
 export const CONFIDENCE_FLOOR = 2.0
 
+/* A single matched term can carry an answer alone only if it appears in at
+   most this share of the corpus. Above it, the word is a connective rather
+   than a subject and the match is a coincidence.
+
+   CHOSEN BY MEASUREMENT, not taste: scripts/ask-gaps.ts runs 43 realistic
+   questions, and this is the value at which all seven false positives fall
+   away while every correct single-term answer survives. See the specificity
+   gate below for the failures it exists to stop. */
+export const SINGLE_TERM_MAX_SHARE = 0.06
+
 /* --- Tokenising ----------------------------------------------------------- */
 
 /**
@@ -619,6 +629,53 @@ export type Answer =
       score: number
     }
 
+/* --------------------------------------------------------------------------
+   Does the match actually address the question?
+
+   Two ways to pass:
+
+     1. At least two of the question's content terms matched. Two independent
+        words agreeing is hard to do by coincidence.
+
+     2. Exactly one matched, but it is the question's RAREST term AND it is
+        rare in absolute terms — present in a quarter of the corpus or less.
+        This is what keeps short, pointed questions working: "where is he
+        based?" reduces to one useful term, and it should answer.
+
+   Fails when the only thing matched is a common word. That is the entire
+   category of false positive this exists to stop.
+   -------------------------------------------------------------------------- */
+function specificityCheck(
+  queryTerms: string[],
+  matchedTerms: string[],
+): { ok: true } | { ok: false; matchedDescription: string } {
+  const matched = matchedTerms.filter((term) => DF.has(term))
+  if (matched.length === 0) {
+    return { ok: false, matchedDescription: 'words too common to carry a topic' }
+  }
+  if (matched.length >= 2) return { ok: true }
+
+  const only = matched[0]!
+  const df = DF.get(only) ?? 0
+  const share = df / Math.max(1, DOCS.length)
+
+  /* Absolute rarity, and ONLY absolute rarity.
+
+     The first version of this also demanded that the single matched term be
+     the rarest term in the QUESTION, which broke "why Postgres and not
+     MongoDB?": "postgres" is rarer than "mongodb" in this corpus but is not
+     in the chunk that answers it, so the rule rejected a correct answer for
+     failing a comparison against a word that was never a candidate. What
+     matters is whether the word that DID match is distinctive enough to pin a
+     topic on its own — not how it ranks against words that did not. */
+  if (share <= SINGLE_TERM_MAX_SHARE) return { ok: true }
+
+  return {
+    ok: false,
+    matchedDescription: `the word "${only}", which appears all over the site`,
+  }
+}
+
 /**
  * The whole system, as one function.
  *
@@ -661,6 +718,46 @@ export function answer(query: string): Answer {
           : 'Something matched, but not well enough to be sure it is about what you asked — ' +
             'so quoting it would be putting words in his mouth. Ask him directly and you ' +
             'will get a real answer.',
+    }
+  }
+
+  /* ── THE SPECIFICITY GATE ────────────────────────────────────────────────
+
+     BM25 alone answers too much. It scores word overlap, and a question's
+     COMMON words overlap with almost everything, so a chunk can clear the
+     floor without being about the subject at all. Measured on 43 realistic
+     questions (scripts/ask-gaps.ts), this produced seven confidently wrong
+     answers, including:
+
+       "has he led a team?"        → "done end to end with their team"
+       "what does he charge?"      → "paid lead platforms charge per lead"
+       "has any client hired him
+        twice?"                    → "being twice as slow costs minutes"
+
+     Every one matched on a single ordinary word. None was about the question.
+     And a wrong answer is worse than a refusal here by a wide margin: the
+     section's whole claim is that nothing is invented, and "yes, he led a
+     team" is an invention whether a model wrote it or a scorer picked it.
+
+     The fix is not a higher floor — that would silence the good answers too,
+     since a correct single-term match like "where is he based?" scores low.
+     It is a requirement about WHICH terms matched: the most distinctive term
+     in the question has to be one of them.
+
+     "Charge" is distinctive in "what does he charge?" and appears in the
+     lead-engine chunk, so that one needs the second half of the rule too:
+     matching ONLY the rarest term, with nothing else, is a coincidence rather
+     than a topic. Two content terms, or one that is rare enough to be
+     unambiguous, is the bar. */
+  const specificity = specificityCheck(queryTerms, top.matchedTerms)
+  if (!specificity.ok) {
+    return {
+      kind: 'refusal',
+      score: top.score,
+      reason:
+        'Something matched, but only on ' +
+        `${specificity.matchedDescription} — not closely enough to be about what you asked. ` +
+        'Quoting it would be putting words in his mouth.',
     }
   }
 

@@ -21,9 +21,24 @@ import { requestCommandPalette } from './CommandPaletteLoader'
    This is one of the three permitted surface-4 (backdrop-filter) elements.
    ========================================================================== */
 
+/* Three slots, each a genuinely different question: what have you built, can
+   I trust it, who are you. Contact is the CTA button beside this list, so it
+   does not need a slot of its own.
+
+   TWO THINGS LEFT THIS LIST, deliberately:
+
+   /graph is now a VIEW of the work rather than a peer of it — /work?view=map.
+   It was a nav item for about a day, and that was the wrong shape: the graph
+   answers the same question as the listing ("what has he built") through a
+   different lens, and a nav slot implies a different subject.
+
+   /lab is the most impressive page here to an engineer and the least useful to
+   anyone deciding whether to hire. It answers no question a visitor arrives
+   with. It is reached from the places where someone is already curious about
+   the machinery — the Ask section, and the two case studies whose engineering
+   it explains — which is a better door than a permanent one. */
 const LINKS = [
   { href: '/work', label: 'Work' },
-  { href: '/lab', label: 'Lab' },
   { href: '/thinking', label: 'Thinking' },
   { href: '/about', label: 'About' },
 ] as const
